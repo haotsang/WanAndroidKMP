@@ -20,7 +20,7 @@ data class Article(
     val niceDate: String,
     val niceShareDate: String = "",
     val courseId: Int,
-    var collect: Boolean = false,
+    val collect: Boolean = false,
     val apkLink: String = "",
     val projectLink: String = "",
     val superChapterId: Int = -1,

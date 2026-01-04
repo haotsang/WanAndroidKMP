@@ -8,8 +8,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentSize
@@ -57,7 +59,13 @@ fun <T : Any> PagingFullLoadLayout(
                 if (state.error is LoginExpiredException) {
                     loginAction.invoke()
                 }
-                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(state.error.message ?: "加载失败")
                     Button(onClick = {
                         pagingState.refresh()
                     }, content = {
@@ -133,7 +141,6 @@ fun <T> FullUiStateLayout(
         fadeIn() togetherWith fadeOut()
     },
     onRetry: () -> Unit = {},
-    loginContent: (@Composable (String) -> Unit)? = null,
     content: @Composable BoxScope.(T) -> Unit
 ) {
     AnimatedContent(targetState = uiState,
@@ -149,7 +156,7 @@ fun <T> FullUiStateLayout(
 
                 is UiState.Exception -> {
                     if (uiState.isLoginExpired) {
-                        loginContent?.invoke("去登录") ?: Box(
+                        Box(
                             modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                         ) {
                             Button(onClick = onRetry, content = {
@@ -157,11 +164,14 @@ fun <T> FullUiStateLayout(
                             })
                         }
                     } else {
-                        Box(
-                            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
+                            Text(uiState.throwable.message ?: "加载失败")
                             Button(onClick = onRetry, content = {
-                                Text(uiState.throwable.message ?: "重新加载")
+                                Text("重新加载")
                             })
                         }
                     }

@@ -49,8 +49,10 @@ kotlin {
 
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.androidx.nav3.ui)
+//            implementation(libs.androidx.nav3.viewmodel)
             implementation(libs.androidx.material3.adaptive)
             implementation(libs.androidx.material3.adaptive.nav3)
+            implementation(libs.material3.window.size)
 
             implementation(libs.webview.multiplatform)
 

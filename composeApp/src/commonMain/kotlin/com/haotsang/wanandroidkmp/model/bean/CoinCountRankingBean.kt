@@ -1,11 +1,14 @@
 package com.haotsang.wanandroidkmp.model.bean
 
 import androidx.compose.runtime.Stable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Stable
 @Serializable
+@Entity(tableName = "coin_count_ranking")
 data class CoinCountRankingBean(
     @SerialName("coinCount")
     val coinCount: Int,
@@ -15,8 +18,9 @@ data class CoinCountRankingBean(
     val nickname: String,
     @SerialName("rank")
     val rank: String,
+    @PrimaryKey
     @SerialName("userId")
-    val userId: Int,
+    val userId: Long,
     @SerialName("username")
     val username: String
 ) {

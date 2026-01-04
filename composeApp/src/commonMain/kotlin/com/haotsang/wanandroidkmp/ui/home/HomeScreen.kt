@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,16 +26,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.AsyncImage
 import com.haotsang.wanandroidkmp.model.UiState.Companion.isLoginExpired
 import com.haotsang.wanandroidkmp.model.UiStateSuccess
 import com.haotsang.wanandroidkmp.model.bean.BannerBean
+import com.haotsang.wanandroidkmp.ui.common.ArticleItem
+import com.haotsang.wanandroidkmp.ui.common.PagingFullLoadLayout
 import com.haotsang.wanandroidkmp.ui.common.pagingFooter
+import com.haotsang.wanandroidkmp.ui.search.SearchPanel
 import kotlinx.coroutines.delay
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -42,11 +46,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
-
     onNavigateToLogin: () -> Unit,
-    onNavigateToSearch: () -> Unit,
     onNavigateToWebView: (String) -> Unit,
-
 ) {
 
     val bannerList by viewModel.banners.collectAsState(emptyList())
@@ -67,41 +68,53 @@ fun HomeScreen(
         }
     }
 
-    Scaffold { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-                .padding(horizontal = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = innerPadding
-        ) {
-            item {
-                AutoScrollBanner(
-                    bannerList = bannerList,
-                    onNavigateToWebView = onNavigateToWebView
-                )
-            }
+    val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
 
-            items(
-                count = articleState.itemCount,
-                key = articleState.itemKey { it.id },
-                itemContent = { index ->
-                    val item = articleState[index]
-                    if (item != null) {
-                        ArticleItem(
-                            article = item,
-                            onClickArticle = onNavigateToWebView,
-                            onFavoriteClick = { favoriteState ->
-                                if (favoriteState) {
-                                    viewModel.favoriteArticle(item.id)
-                                } else {
-                                    viewModel.cancelFavoriteArticle(item.id)
-                                }
-                            }
-                        )
-                    }
+    Scaffold(topBar = {
+        SearchPanel(
+            scrollBehavior = scrollBehavior,
+            onNavigateToWebView = onNavigateToWebView,
+            onNavigateToLogin = onNavigateToLogin
+        )
+    }, modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)) { innerPadding ->
+        PagingFullLoadLayout(
+            modifier = Modifier.fillMaxSize(), pagingState = articleState
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = innerPadding
+            ) {
+                item {
+                    AutoScrollBanner(
+                        bannerList = bannerList,
+                        onNavigateToWebView = onNavigateToWebView
+                    )
                 }
-            )
-            pagingFooter(pagingState = articleState)
+
+                items(
+                    count = articleState.itemCount,
+                    key = articleState.itemKey { it.id },
+                    itemContent = { index ->
+                        val item = articleState[index]
+                        if (item != null) {
+                            ArticleItem(
+                                article = item,
+                                onClickArticle = onNavigateToWebView,
+                                onFavoriteClick = { favoriteState ->
+                                    if (favoriteState) {
+                                        viewModel.favoriteArticle(item.id)
+                                    } else {
+                                        viewModel.cancelFavoriteArticle(item.id)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                )
+                pagingFooter(pagingState = articleState)
+            }
         }
     }
 

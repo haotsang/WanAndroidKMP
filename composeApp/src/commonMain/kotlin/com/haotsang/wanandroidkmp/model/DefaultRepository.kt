@@ -1,5 +1,6 @@
 package com.haotsang.wanandroidkmp.model
 
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -16,10 +17,15 @@ import com.haotsang.wanandroidkmp.model.bean.UserInfoBean
 import com.haotsang.wanandroidkmp.model.bean.WechatAccountSortData
 import com.haotsang.wanandroidkmp.model.datasource.ArticleInSystemSource
 import com.haotsang.wanandroidkmp.model.datasource.ArticleInWechatAccountSource
+import com.haotsang.wanandroidkmp.model.datasource.CoinCountRankingLocalSource
+import com.haotsang.wanandroidkmp.model.datasource.CoinCountRankingRemoteMediator
 import com.haotsang.wanandroidkmp.model.datasource.CoinCountRankingSource
 import com.haotsang.wanandroidkmp.model.datasource.HomeArticleSource
+import com.haotsang.wanandroidkmp.model.datasource.SearchResultSource
+import com.haotsang.wanandroidkmp.model.datasource.SquareArticleSource
 import com.haotsang.wanandroidkmp.model.datasource.UserCoinCountListSource
 import com.haotsang.wanandroidkmp.model.datasource.WendaArticleSource
+import com.haotsang.wanandroidkmp.model.local.getRoomDatabase
 import com.haotsang.wanandroidkmp.network.WanAndroidResponse.Companion.catchData
 import com.haotsang.wanandroidkmp.network.dataResultBody
 import com.haotsang.wanandroidkmp.network.httpClient
@@ -59,6 +65,14 @@ class DefaultRepository: Repository {
         }.flowOn(Dispatchers.IO)
     }
 
+    override fun searchResult(keyword: String): Flow<PagingData<Article>> {
+        return Pager(config = PagingConfig(
+            initialLoadSize = 10, pageSize = 20, prefetchDistance = 1
+        ), pagingSourceFactory = {
+            SearchResultSource(keyword)
+        }).flow.flowOn(Dispatchers.IO)
+    }
+
     override fun userCoinCount(): Flow<UserCoinCountData> {
         return flow {
             val result = httpClient().get("lg/coin/userinfo/json")
@@ -75,13 +89,21 @@ class DefaultRepository: Repository {
         }).flow.flowOn(Dispatchers.IO)
     }
 
+    @OptIn(ExperimentalPagingApi::class)
     override fun coinCountRanking(): Flow<PagingData<CoinCountRankingBean>> {
+        val db = getRoomDatabase()
+        val dao = db.coinCountRankingDao()
+        val keysDao = db.coinRankRemoteKeysDao()
+
         return Pager(
             config = PagingConfig(
                 initialLoadSize = 10, pageSize = 20, prefetchDistance = 1
-            ), pagingSourceFactory = {
-                CoinCountRankingSource()
-            }).flow.flowOn(Dispatchers.IO)
+            ),
+            remoteMediator = CoinCountRankingRemoteMediator(db, dao, keysDao),
+            pagingSourceFactory = {
+                CoinCountRankingLocalSource(dao)
+            }
+        ).flow.flowOn(Dispatchers.IO)
     }
 
     override fun homeArticles(): Flow<PagingData<Article>> {
@@ -89,6 +111,14 @@ class DefaultRepository: Repository {
             initialLoadSize = 10, pageSize = 20, prefetchDistance = 1
         ), pagingSourceFactory = {
             HomeArticleSource()
+        }).flow.flowOn(Dispatchers.IO)
+    }
+
+    override fun squareArticles(): Flow<PagingData<Article>> {
+        return Pager(config = PagingConfig(
+            initialLoadSize = 10, pageSize = 20, prefetchDistance = 1
+        ), pagingSourceFactory = {
+            SquareArticleSource()
         }).flow.flowOn(Dispatchers.IO)
     }
 

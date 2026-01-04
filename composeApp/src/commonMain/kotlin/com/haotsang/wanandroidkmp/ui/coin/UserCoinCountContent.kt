@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Backspace
 import androidx.compose.material.icons.outlined.ViewKanban
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,47 +59,46 @@ fun UserCoinCountScreen(
         viewModel.userCoinCount()
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize()
-        .nestedScroll(scrollBehavior.nestedScrollConnection),
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-        LargeTopAppBar(
-            title = { TitleCoinCount(userCoinCountState) },
-            actions = {
-                IconButton(onClick = onNavigateToRanking) {
-                    Icon(
-                        imageVector = Icons.Outlined.ViewKanban,
-                        contentDescription = null,
-                        modifier = Modifier.rotate(180f)
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                titleContentColor = contentColorFor(MaterialTheme.colorScheme.background),
-                actionIconContentColor = contentColorFor(MaterialTheme.colorScheme.background),
-                navigationIconContentColor = contentColorFor(MaterialTheme.colorScheme.background),
-            ),
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Outlined.ArrowBack,
-                        contentDescription = null,
-                    )
-                }
-            },
-            scrollBehavior = scrollBehavior,
-        )
-    }, content = {
+            LargeTopAppBar(
+                title = { TitleCoinCount(userCoinCountState) },
+                actions = {
+                    IconButton(onClick = onNavigateToRanking) {
+                        Icon(
+                            imageVector = Icons.Outlined.ViewKanban,
+                            contentDescription = null,
+                            modifier = Modifier.rotate(180f)
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowBack,
+                            contentDescription = null,
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior,
+            )
+        }
+    ) { innerPadding ->
         PagingFullLoadLayout(
-            modifier = Modifier.fillMaxSize().padding(it),
+            modifier = Modifier.fillMaxSize(),
             pagingState = userCoinCountListState,
             content = {
                 UserCoinCountContent(
                     modifier = Modifier.fillMaxSize(),
+                    contentPadding = innerPadding,
                     userCoinCountList = userCoinCountListState,
                 )
-            })
-    })
+            }
+        )
+    }
 }
 
 @Composable
@@ -129,12 +126,13 @@ private fun TitleCoinCount(userCoinCountState: UserCoinCountData) {
 @Composable
 private fun UserCoinCountContent(
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(),
     userCoinCountList: LazyPagingItems<UserCoinCountListData> = collectAsLazyEmptyPagingItems(),
 ) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(vertical = 12.dp)
+        contentPadding = contentPadding
     ) {
         items(userCoinCountList.itemCount) { index ->
             val data = userCoinCountList[index]

@@ -11,56 +11,71 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.haotsang.wanandroidkmp.ui.common.WanCenterAlignedTopAppBar
+import com.haotsang.wanandroidkmp.ui.common.FullUiStateLayout
+import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArchitectureScreen(
     onNavigationToDetail: (Int) -> Unit,
-    viewModel: ArchitectureViewModel = viewModel { ArchitectureViewModel() }
+    viewModel: ArchitectureViewModel = koinViewModel()
 ) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    val architectureTree by viewModel.architectureTree.collectAsState(emptyList())
-    Scaffold { innerPadding ->
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-                .padding(horizontal = 16.dp),
-            contentPadding = innerPadding
-        ) {
-
-            architectureTree.forEach { data ->
-                item(key = data.id) {
-                    Text(text = data.name, fontSize = 18.sp)
-                    Spacer(Modifier.fillMaxWidth().height(10.dp))
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        data.children.orEmpty().forEachIndexed { index, child ->
-                            Card(
-                                modifier = Modifier.background(MaterialTheme.colorScheme.background)
-                                    .clickable {
-                                        onNavigationToDetail(child.id)
-//                                        navController.navigate(route = ArchChildPageParams(Json.encodeToString(data), index))
-                                    },
+    val uiState by viewModel.architectureTree.collectAsState()
+    Scaffold(
+        topBar = {
+            WanCenterAlignedTopAppBar(title = "体系", scrollBehavior = scrollBehavior)
+        }, modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+    ) { innerPadding ->
+        FullUiStateLayout(modifier = Modifier.fillMaxSize(),
+            uiState = uiState,
+            content = { dataList ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = innerPadding
+                ) {
+                    dataList.forEach { data ->
+                        item(key = data.id) {
+                            Text(text = data.name, fontSize = 18.sp)
+                            Spacer(Modifier.fillMaxWidth().height(10.dp))
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text(text = child.name, modifier = Modifier.padding(10.dp))
+                                data.children.orEmpty().forEachIndexed { index, child ->
+                                    Card(
+                                        modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                                            .clickable {
+                                                onNavigationToDetail(child.id)
+//                                        navController.navigate(route = ArchChildPageParams(Json.encodeToString(data), index))
+                                            },
+                                    ) {
+                                        Text(text = child.name, modifier = Modifier.padding(10.dp))
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            }
 
-        }
+                }
+            })
+
     }
 }

@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,7 +19,6 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
@@ -29,14 +28,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.haotsang.wanandroidkmp.model.bean.CoinCountRankingBean
+import com.haotsang.wanandroidkmp.ui.common.PagingFullLoadLayout
+import com.haotsang.wanandroidkmp.ui.common.WanTopAppBar
 import com.haotsang.wanandroidkmp.ui.common.pagingFooter
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -48,40 +49,45 @@ fun RankScreen(
     onBack: () -> Unit,
     viewModel: RankViewModel = koinViewModel()
 ) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     val coinCountRankingState = viewModel.coinCountRankingState.collectAsLazyPagingItems()
 
-    Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-        TopAppBar(title = { Text("积分排行榜") }, navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "返回"
-                )
-            }
-        }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            titleContentColor = contentColorFor(MaterialTheme.colorScheme.background),
-            actionIconContentColor = contentColorFor(MaterialTheme.colorScheme.background),
-            navigationIconContentColor = contentColorFor(MaterialTheme.colorScheme.background),
-        ))
-    }, content = { paddingValues ->
-        LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = paddingValues) {
-            items(
-                coinCountRankingState.itemCount,
-                key = coinCountRankingState.itemKey { it.userId }
-            ) { index ->
-                val data = coinCountRankingState[index]
-                if (data != null) {
-                    CoinCountRankingItem(
-                        data = data, max = coinCountRankingState[0]?.coinCount ?: 0
-                    )
+    Scaffold(
+        modifier = Modifier.fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            WanTopAppBar(
+                title = "积分排行榜",
+                onBackClick = onBack,
+                scrollBehavior = scrollBehavior
+            )
+        },
+        content = { innerPadding ->
+            PagingFullLoadLayout(
+                modifier = Modifier.fillMaxSize(), pagingState = coinCountRankingState
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    contentPadding = innerPadding
+                ) {
+                    items(
+                        coinCountRankingState.itemCount,
+                        key = coinCountRankingState.itemKey { it.userId }
+                    ) { index ->
+                        val data = coinCountRankingState[index]
+                        if (data != null) {
+                            CoinCountRankingItem(
+                                data = data, max = coinCountRankingState[0]?.coinCount ?: 0
+                            )
+                        }
+                    }
+                    pagingFooter(pagingState = coinCountRankingState)
                 }
             }
-            pagingFooter(pagingState = coinCountRankingState)
         }
-
-    })
+    )
 
 }
 

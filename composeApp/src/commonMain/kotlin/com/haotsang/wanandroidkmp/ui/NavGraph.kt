@@ -29,54 +29,52 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+//import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import androidx.savedstate.serialization.SavedStateConfiguration
 import com.haotsang.wanandroidkmp.ui.arch.ArchitectureChildScreen
 import com.haotsang.wanandroidkmp.ui.arch.ArchitectureScreen
 import com.haotsang.wanandroidkmp.ui.coin.UserCoinCountScreen
 import com.haotsang.wanandroidkmp.ui.home.HomeScreen
 import com.haotsang.wanandroidkmp.ui.login.LoginScreen
+import com.haotsang.wanandroidkmp.ui.login.RegisterScreen
 import com.haotsang.wanandroidkmp.ui.profile.ProfileScreen
 import com.haotsang.wanandroidkmp.ui.rank.RankScreen
-import com.haotsang.wanandroidkmp.ui.search.SearchScreen
+import com.haotsang.wanandroidkmp.ui.setting.SettingScreen
+import com.haotsang.wanandroidkmp.ui.square.SquareScreen
 import com.haotsang.wanandroidkmp.ui.webview.WebViewScreen
 import com.haotsang.wanandroidkmp.ui.wenda.WendaScreen
 
+private val topLevelRoutes: List<TopLevelRoute> = listOf(Home, Square, Wenda, Architecture, Profile)
+
 @Composable
-fun MainRoute() {
+fun MainRoute(useNavRail: Boolean) {
     val backStack = rememberNavBackStack(NavConfig, Home)
 
-    val bottomNavigatorDataLists = listOf(
-        Home, Square, Wenda, Architecture, Profile
-    )
-
-    val isNavigation = bottomNavigatorDataLists.any { it == backStack.last() }
-
-    val compactMode = true
-    if (compactMode) {
+    if (useNavRail) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            AnimatedNavigation(
+                modifier = Modifier.fillMaxHeight().width(100.dp).zIndex(12f),
+                useNavRail = useNavRail,
+                topLevelRoutes = topLevelRoutes,
+                backStack = backStack
+            )
+            NavGraph(backStack = backStack, modifier = Modifier.weight(1f))
+        }
+    } else {
         Column(modifier = Modifier.fillMaxSize()) {
             NavGraph(backStack = backStack, modifier = Modifier.weight(1f))
             AnimatedNavigation(
                 modifier = Modifier.fillMaxWidth(),
-                isNavigation = isNavigation,
-                compactMode = compactMode,
-                bottomNavigatorDataLists = bottomNavigatorDataLists,
+                useNavRail = useNavRail,
+                topLevelRoutes = topLevelRoutes,
                 backStack = backStack
             )
-        }
-    } else {
-        Row(modifier = Modifier.fillMaxSize()) {
-            AnimatedNavigation(
-                modifier = Modifier.fillMaxHeight().width(100.dp).zIndex(12f),
-                isNavigation = isNavigation,
-                compactMode = compactMode,
-                bottomNavigatorDataLists = bottomNavigatorDataLists,
-                backStack = backStack
-            )
-            NavGraph(backStack = backStack, modifier = Modifier.weight(1f))
         }
     }
 
@@ -87,60 +85,88 @@ fun NavGraph(backStack: NavBackStack<NavKey>, modifier: Modifier = Modifier) {
     val onBack: () -> Unit = {
         backStack.removeLastOrNull()
     }
+    fun onNavigateTo(key: NavKey) {
+        backStack.add(key)
+    }
+
+    fun onReplace(key: NavKey) {
+        backStack[backStack.lastIndex] = key
+    }
+
     NavDisplay(
         modifier = modifier,
         backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
+        onBack = onBack,
+//        entryDecorators = listOf(
+//            // Add the default decorators for managing scenes and saving state
+//            rememberSaveableStateHolderNavEntryDecorator(),
+//            // Then add the view model store decorator
+//            rememberViewModelStoreNavEntryDecorator()
+//        ),
         entryProvider = entryProvider {
             entry<Login> {
                 LoginScreen(
                     onBack = onBack,
                     onNavigateToRegister = {
-
+                        onReplace(Register)
                     },
+                )
+            }
+            entry<Register> {
+                RegisterScreen(
+                    onBack = onBack,
+                    onNavigateToLogin = {
+                        onReplace(Login)
+                    }
                 )
             }
             entry<Home> {
                 HomeScreen(
-                    onNavigateToLogin = {
-                        backStack.add(Login)
-                    }, onNavigateToSearch = {
-                        backStack.add(Search)
-                    }, onNavigateToWebView = {
-                        backStack.add(WebView(it))
-                    }
+                    onNavigateToLogin = { onNavigateTo(Login) },
+                    onNavigateToWebView = { onNavigateTo(WebView(it)) }
                 )
             }
             entry<Square> {
-                Text("Square")
+                SquareScreen(
+                    onNavigateToLogin = { onNavigateTo(Login) },
+                    onNavigateToWebView = { onNavigateTo(WebView(it)) }
+                )
             }
-            entry<Search> {
-                SearchScreen()
-            }
+
             entry<Profile> {
-                ProfileScreen(onNavigateToLogin = {
-                    backStack.add(Login)
-                }, onNavigateToUserCoin = {
-                    backStack.add(UserCoin)
-                })
+                ProfileScreen(
+                    onNavigateTo = { onNavigateTo(it) },
+                )
             }
             entry<Architecture> {
                 ArchitectureScreen(
                     onNavigationToDetail = {
-                        backStack.add(ArchitectureDetail(it))
+                        onNavigateTo(ArchitectureDetail(it))
                     }
                 )
             }
-            entry<ArchitectureDetail> {
-                ArchitectureChildScreen(it.cid)
+            entry<ArchitectureDetail> { key ->
+                ArchitectureChildScreen(
+                    cid = key.cid,
+                    onBack = onBack,
+                    onNavigateToLogin = { onNavigateTo(Login) },
+                    onNavigateToWebView = { onNavigateTo(WebView(it)) }
+                )
             }
             entry<Wenda> {
-                WendaScreen()
+                WendaScreen(
+                    onNavigateToLogin = { onNavigateTo(Login) },
+                    onNavigateToWebView = { onNavigateTo(WebView(it)) }
+                )
             }
             entry<UserCoin> {
-                UserCoinCountScreen(onBack = onBack, onNavigateToRanking = {
-                    backStack.add(Rank)
-                })
+                UserCoinCountScreen(
+                    onBack = onBack,
+                    onNavigateToRanking = { onNavigateTo(Rank) }
+                )
+            }
+            entry<Collections> {
+                Text("Collections")
             }
             entry<Rank> {
                 RankScreen(
@@ -173,7 +199,7 @@ fun NavGraph(backStack: NavBackStack<NavKey>, modifier: Modifier = Modifier) {
                             )
                 }
             ) {
-                Text("This is Screen C")
+                SettingScreen(onBack = onBack)
             }
         },
         transitionSpec = {
@@ -214,27 +240,27 @@ fun NavGraph(backStack: NavBackStack<NavKey>, modifier: Modifier = Modifier) {
 @Composable
 private fun AnimatedNavigation(
     modifier: Modifier = Modifier.fillMaxWidth(),
-    isNavigation: Boolean,
-    compactMode: Boolean = true,
-    bottomNavigatorDataLists: List<Route>,
+    useNavRail: Boolean = true,
+    topLevelRoutes: List<TopLevelRoute>,
     backStack: NavBackStack<NavKey>,
     enter: EnterTransition = expandVertically(),
     exit: ExitTransition = shrinkVertically(),
 ) {
+    val showBottomBar = topLevelRoutes.any { it == backStack.last() }
     AnimatedVisibility(
-        visible = isNavigation,
+        visible = showBottomBar,
         enter = enter,
         exit = exit,
         modifier = modifier
     ) {
-        if (compactMode) {
-            NavigationBar(
+        if (useNavRail) {
+            NavigationRail(
                 modifier = modifier,
                 containerColor = MaterialTheme.colorScheme.background,
                 contentColor = contentColorFor(MaterialTheme.colorScheme.background)
             ) {
-                bottomNavigatorDataLists.forEach {
-                    NavigationBarItem(selected = backStack.last() == it, onClick = {
+                topLevelRoutes.forEach {
+                    NavigationRailItem(selected = backStack.last() == it, onClick = {
                         backStack[backStack.lastIndex] = it
                     }, icon = {
                         Icon(it.icon, contentDescription = null)
@@ -244,13 +270,13 @@ private fun AnimatedNavigation(
                 }
             }
         } else {
-            NavigationRail(
+            NavigationBar(
                 modifier = modifier,
                 containerColor = MaterialTheme.colorScheme.background,
                 contentColor = contentColorFor(MaterialTheme.colorScheme.background)
             ) {
-                bottomNavigatorDataLists.forEach {
-                    NavigationRailItem(selected = backStack.last() == it, onClick = {
+                topLevelRoutes.forEach {
+                    NavigationBarItem(selected = backStack.last() == it, onClick = {
                         backStack[backStack.lastIndex] = it
                     }, icon = {
                         Icon(it.icon, contentDescription = null)

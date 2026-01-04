@@ -1,11 +1,14 @@
 package com.haotsang.wanandroidkmp.di
 
+import com.haotsang.wanandroidkmp.ui.arch.ArchitectureChildViewModel
+import com.haotsang.wanandroidkmp.ui.arch.ArchitectureViewModel
 import com.haotsang.wanandroidkmp.ui.coin.UserCoinCountViewModel
 import com.haotsang.wanandroidkmp.ui.home.HomeViewModel
 import com.haotsang.wanandroidkmp.ui.login.LoginViewModel
 import com.haotsang.wanandroidkmp.ui.profile.ProfileViewModel
 import com.haotsang.wanandroidkmp.ui.rank.RankViewModel
 import com.haotsang.wanandroidkmp.ui.search.SearchViewModel
+import com.haotsang.wanandroidkmp.ui.square.SquareViewModel
 import com.haotsang.wanandroidkmp.ui.wechat.WechatAccountViewModel
 import com.haotsang.wanandroidkmp.ui.wenda.WendaViewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -21,4 +24,7 @@ val viewModelModule = module {
     viewModelOf(::WechatAccountViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::UserCoinCountViewModel)
+    viewModelOf(::ArchitectureViewModel)
+    viewModelOf(::ArchitectureChildViewModel)
+    viewModelOf(::SquareViewModel)
 }

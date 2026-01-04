@@ -47,7 +47,9 @@ class ProfileViewModel(
 
     fun userInfo() {
         viewModelScope.launch {
-            repository.userInfo().catch {
+            repository.userInfo().onStart {
+                _userInfoState.emit(UiState.Loading)
+            }.catch {
                 if (it is DataResultException) {
                     _userInfoState.emit(UiState.Failed(it.message))
                 } else {

@@ -4,8 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.haotsang.wanandroidkmp.model.Repository
-import com.haotsang.wanandroidkmp.model.DefaultRepository
 import com.haotsang.wanandroidkmp.model.UiState
+import com.haotsang.wanandroidkmp.model.usecase.CancelFavoriteArticleUseCase
+import com.haotsang.wanandroidkmp.model.usecase.FavoriteArticleUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -16,7 +17,9 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val repository: Repository
+    private val repository: Repository,
+    private val favoriteArticleUseCase: FavoriteArticleUseCase,
+    private val cancelFavoriteArticleUseCase: CancelFavoriteArticleUseCase
 ) : ViewModel() {
 
 
@@ -30,7 +33,7 @@ class HomeViewModel(
 
     fun favoriteArticle(id: Int) {
         viewModelScope.launch {
-            repository.favoriteArticle(id).onStart {
+            favoriteArticleUseCase(id).onStart {
                 mFavoriteState.emit(UiState.Loading)
             }.onEach {
                 mFavoriteState.emit(UiState.Success(true))
@@ -42,7 +45,7 @@ class HomeViewModel(
 
     fun cancelFavoriteArticle(id: Int) {
         viewModelScope.launch {
-            repository.cancelFavoriteArticle(id).onStart {
+            cancelFavoriteArticleUseCase(id).onStart {
                 mFavoriteState.emit(UiState.Loading)
             }.onEach {
                 mFavoriteState.emit(UiState.Success(true))

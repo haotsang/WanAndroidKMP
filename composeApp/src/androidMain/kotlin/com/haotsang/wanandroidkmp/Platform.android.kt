@@ -21,12 +21,6 @@ actual fun getCurrentTimeMillis(): Long {
     return System.currentTimeMillis()
 }
 
-actual fun htmlUnescape(input: String): String {
-    return android.text.Html
-        .fromHtml(input, android.text.Html.FROM_HTML_MODE_LEGACY)
-        .toString()
-}
-
 object AndroidKVStorage : IKvStorage {
     private val sharedPreferences by lazy {
         WanAndroidApplication.CONTEXT.getSharedPreferences("wanAndroidApp", Context.MODE_PRIVATE)

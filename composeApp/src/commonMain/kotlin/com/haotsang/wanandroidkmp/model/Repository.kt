@@ -27,7 +27,17 @@ interface Repository {
 
     fun homeArticles(): Flow<PagingData<Article>>
 
+    fun squareArticles(): Flow<PagingData<Article>>
+
     fun hotkey(): Flow<List<SearchBean>>
+
+    /**
+     * 搜索结果
+     *
+     * @param keyword 关键词
+     * @return
+     */
+    fun searchResult(keyword: String): Flow<PagingData<Article>>
 
     fun userInfo(): Flow<UserFullInfoBean?>
 

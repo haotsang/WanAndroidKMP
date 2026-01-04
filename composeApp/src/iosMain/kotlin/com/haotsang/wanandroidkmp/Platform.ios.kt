@@ -27,17 +27,6 @@ actual fun getCurrentTimeMillis(): Long {
     return (NSDate().timeIntervalSince1970 * 1000).toLong()
 }
 
-actual fun htmlUnescape(input: String): String {
-    return input
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&amp;", "&")
-        .replace("&quot;", "\"")
-        .replace("&#39;", "'")
-        .replace("&nbsp;", " ")
-}
-
-
 object IOSKvStorage : IKvStorage {
     private val defaults = NSUserDefaults.standardUserDefaults
 

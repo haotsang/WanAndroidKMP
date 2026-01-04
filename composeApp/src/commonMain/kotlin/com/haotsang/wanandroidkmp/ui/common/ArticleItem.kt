@@ -1,4 +1,4 @@
-package com.haotsang.wanandroidkmp.ui.home
+package com.haotsang.wanandroidkmp.ui.common
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -35,8 +35,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.haotsang.wanandroidkmp.htmlUnescape
 import com.haotsang.wanandroidkmp.model.bean.Article
+import com.haotsang.wanandroidkmp.util.HtmlParser
 
 @Composable
 fun ArticleItem(
@@ -70,7 +70,7 @@ fun ArticleItem(
                         appendInlineContent("fresh", "新")
                     }
 
-                    append(htmlUnescape(article.title))
+                    append(HtmlParser.fromHtml(article.title))
                 },
                 maxLines = 2,
                 fontSize = MaterialTheme.typography.titleMedium.fontSize,
