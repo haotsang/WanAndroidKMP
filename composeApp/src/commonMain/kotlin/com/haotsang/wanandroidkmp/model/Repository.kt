@@ -9,6 +9,7 @@ import com.haotsang.wanandroidkmp.model.bean.NullData
 import com.haotsang.wanandroidkmp.model.bean.SearchBean
 import com.haotsang.wanandroidkmp.model.bean.UserCoinCountData
 import com.haotsang.wanandroidkmp.model.bean.UserCoinCountListData
+import com.haotsang.wanandroidkmp.model.bean.UserFavoriteArticleData
 import com.haotsang.wanandroidkmp.model.bean.UserFullInfoBean
 import com.haotsang.wanandroidkmp.model.bean.UserInfoBean
 import com.haotsang.wanandroidkmp.model.bean.WechatAccountSortData
@@ -84,6 +85,14 @@ interface Repository {
      */
     fun articleInWechatAccount(id: Int): Flow<PagingData<Article>>
 
+
+    /**
+     * 用户收藏的文章
+     *
+     * @return
+     */
+    fun userFavoriteArticles(): Flow<PagingData<UserFavoriteArticleData>>
+
     /**
      * 收藏文章
      *
@@ -99,4 +108,13 @@ interface Repository {
      * @return
      */
     fun cancelFavoriteArticle(id: Int): Flow<String?>
+
+    /**
+     * 我的收藏页面的取消收藏
+     *
+     * @param id
+     * @param originId
+     * @return
+     */
+    fun cancelUserFavoriteArticle(id: Int, originId: Int): Flow<String?>
 }

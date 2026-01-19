@@ -43,6 +43,7 @@ fun ArchitectureScreen(
     ) { innerPadding ->
         FullUiStateLayout(modifier = Modifier.fillMaxSize(),
             uiState = uiState,
+            onRetry = { viewModel.refreshData() },
             content = { dataList ->
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()

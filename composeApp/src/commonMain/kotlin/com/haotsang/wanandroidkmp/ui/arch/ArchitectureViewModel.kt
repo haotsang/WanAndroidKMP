@@ -26,7 +26,7 @@ class ArchitectureViewModel(
         refreshData()
     }
 
-    private fun refreshData() {
+    fun refreshData() {
         viewModelScope.launch {
             repository.architectureTree().onStart {
                 _architectureTree.emit(UiState.Loading)

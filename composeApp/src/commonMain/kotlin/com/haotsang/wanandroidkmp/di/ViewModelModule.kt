@@ -6,6 +6,7 @@ import com.haotsang.wanandroidkmp.ui.coin.UserCoinCountViewModel
 import com.haotsang.wanandroidkmp.ui.home.HomeViewModel
 import com.haotsang.wanandroidkmp.ui.login.LoginViewModel
 import com.haotsang.wanandroidkmp.ui.profile.ProfileViewModel
+import com.haotsang.wanandroidkmp.ui.profile.UserFavoriteViewModel
 import com.haotsang.wanandroidkmp.ui.rank.RankViewModel
 import com.haotsang.wanandroidkmp.ui.search.SearchViewModel
 import com.haotsang.wanandroidkmp.ui.square.SquareViewModel
@@ -27,4 +28,5 @@ val viewModelModule = module {
     viewModelOf(::ArchitectureViewModel)
     viewModelOf(::ArchitectureChildViewModel)
     viewModelOf(::SquareViewModel)
+    viewModelOf(::UserFavoriteViewModel)
 }

@@ -44,6 +44,7 @@ import com.haotsang.wanandroidkmp.ui.home.HomeScreen
 import com.haotsang.wanandroidkmp.ui.login.LoginScreen
 import com.haotsang.wanandroidkmp.ui.login.RegisterScreen
 import com.haotsang.wanandroidkmp.ui.profile.ProfileScreen
+import com.haotsang.wanandroidkmp.ui.profile.UserFavoriteScreen
 import com.haotsang.wanandroidkmp.ui.rank.RankScreen
 import com.haotsang.wanandroidkmp.ui.setting.SettingScreen
 import com.haotsang.wanandroidkmp.ui.square.SquareScreen
@@ -166,7 +167,10 @@ fun NavGraph(backStack: NavBackStack<NavKey>, modifier: Modifier = Modifier) {
                 )
             }
             entry<Collections> {
-                Text("Collections")
+                UserFavoriteScreen(
+                    onBack = onBack,
+                    onNavigateToWebView = { onNavigateTo(WebView(it)) }
+                )
             }
             entry<Rank> {
                 RankScreen(

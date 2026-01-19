@@ -12,6 +12,7 @@ import com.haotsang.wanandroidkmp.model.bean.NullData
 import com.haotsang.wanandroidkmp.model.bean.SearchBean
 import com.haotsang.wanandroidkmp.model.bean.UserCoinCountData
 import com.haotsang.wanandroidkmp.model.bean.UserCoinCountListData
+import com.haotsang.wanandroidkmp.model.bean.UserFavoriteArticleData
 import com.haotsang.wanandroidkmp.model.bean.UserFullInfoBean
 import com.haotsang.wanandroidkmp.model.bean.UserInfoBean
 import com.haotsang.wanandroidkmp.model.bean.WechatAccountSortData
@@ -24,6 +25,7 @@ import com.haotsang.wanandroidkmp.model.datasource.HomeArticleSource
 import com.haotsang.wanandroidkmp.model.datasource.SearchResultSource
 import com.haotsang.wanandroidkmp.model.datasource.SquareArticleSource
 import com.haotsang.wanandroidkmp.model.datasource.UserCoinCountListSource
+import com.haotsang.wanandroidkmp.model.datasource.UserFavoriteArticlesSource
 import com.haotsang.wanandroidkmp.model.datasource.WendaArticleSource
 import com.haotsang.wanandroidkmp.model.local.getRoomDatabase
 import com.haotsang.wanandroidkmp.network.WanAndroidResponse.Companion.catchData
@@ -31,6 +33,7 @@ import com.haotsang.wanandroidkmp.network.dataResultBody
 import com.haotsang.wanandroidkmp.network.httpClient
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.http.parameters
 import kotlinx.coroutines.Dispatchers
@@ -200,6 +203,14 @@ class DefaultRepository: Repository {
         }.flowOn(Dispatchers.IO)
     }
 
+    override fun userFavoriteArticles(): Flow<PagingData<UserFavoriteArticleData>> {
+        return Pager(config = PagingConfig(
+            initialLoadSize = 10, pageSize = 20, prefetchDistance = 1
+        ), pagingSourceFactory = {
+            UserFavoriteArticlesSource()
+        }).flow.flowOn(Dispatchers.IO)
+    }
+
     override fun favoriteArticle(id: Int): Flow<String?> {
         return flow {
             val result = httpClient().submitForm("lg/collect/$id/json")
@@ -216,5 +227,13 @@ class DefaultRepository: Repository {
         }.flowOn(Dispatchers.IO)
     }
 
+    override fun cancelUserFavoriteArticle(id: Int, originId: Int): Flow<String?> {
+        return flow {
+            val result = httpClient().post("lg/uncollect/$id/json") {
+                parameter("originId", originId)
+            }.dataResultBody<String>().catchData
+            emit(result)
+        }.flowOn(Dispatchers.IO)
+    }
 
 }
