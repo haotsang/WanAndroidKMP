@@ -25,7 +25,11 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        maven("https://jogamp.org/deployment/maven")
     }
 }
 
-include(":composeApp")
+include(":shared")
+include(":desktopApp")
+include(":androidApp")
+include(":webApp")
