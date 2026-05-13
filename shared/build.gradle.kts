@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -11,9 +12,10 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "com.haotsang.wanandroidkmp.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
+        androidResources.enable = true
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
@@ -22,12 +24,20 @@ kotlin {
         androidResources {
             enable = true
         }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
 
-    jvm("desktop") {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
+    jvm()
+
+    js {
+        browser()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
     }
     
     listOf(
@@ -99,21 +109,30 @@ kotlin {
             implementation(libs.coil.kotr)
 
         }
-        val desktopMain by getting
-        desktopMain.dependencies {
-            implementation(libs.ktor.client.cio)
-            implementation(libs.coil.kotr)
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.ktor.client.apache5)
+        }
+        jsMain.dependencies {
+            implementation(libs.ktor.client.js)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.js)
         }
     }
 }
 
+//dependencies {
+//    add("androidRuntimeClasspath", compose.uiTooling)
+//    add("kspAndroid", libs.androidx.room.compiler)
+//    add("kspDesktop", libs.androidx.room.compiler)
+//    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+//    add("kspIosX64", libs.androidx.room.compiler)
+//    add("kspIosArm64", libs.androidx.room.compiler)
+//}
 dependencies {
-    add("androidRuntimeClasspath", compose.uiTooling)
-    add("kspAndroid", libs.androidx.room.compiler)
-    add("kspDesktop", libs.androidx.room.compiler)
-    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
-    add("kspIosX64", libs.androidx.room.compiler)
-    add("kspIosArm64", libs.androidx.room.compiler)
+    androidRuntimeClasspath(compose.uiTooling)
 }
 
 room {

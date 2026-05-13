@@ -8,14 +8,15 @@ plugins {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
-    }
+//    compilerOptions {
+//        jvmTarget.set(JvmTarget.JVM_11)
+//    }
 }
 
 dependencies {
     implementation(projects.shared)
     implementation(compose.desktop.currentOs)
+    implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.koin.core)
 }
 

@@ -2,7 +2,7 @@ package com.haotsang.wanandroidkmp
 
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.okhttp.OkHttp
 import java.util.prefs.Preferences
 
 class DesktopPlatform : Platform {
@@ -11,7 +11,7 @@ class DesktopPlatform : Platform {
 
 actual fun getPlatform(): Platform = DesktopPlatform()
 
-actual fun httpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = HttpClient(CIO) {
+actual fun httpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = HttpClient(OkHttp) {
     config(this)
 }
 

@@ -2,6 +2,7 @@ package com.haotsang.wanandroidkmp.network
 
 import com.haotsang.wanandroidkmp.httpClient
 import com.haotsang.wanandroidkmp.model.local.UserInfoHelper
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
@@ -37,6 +38,10 @@ object Network {
         }
         install(HttpCookies) {
             storage = AcceptAllCookiesStorage()
+        }
+        install(HttpRequestRetry) {
+            retryOnServerErrors(maxRetries = 1)
+            exponentialDelay()
         }
         install(HttpTimeout) {
             requestTimeoutMillis = 3000
