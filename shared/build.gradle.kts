@@ -1,3 +1,4 @@
+import com.google.devtools.ksp.processing.kspJvmArgParser
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -112,13 +113,21 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
-            implementation(libs.ktor.client.apache5)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.coil.kotr)
         }
-        jsMain.dependencies {
-            implementation(libs.ktor.client.js)
+
+        val webMain by creating {
+            dependsOn(commonMain.get())
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
         }
-        wasmJsMain.dependencies {
-            implementation(libs.ktor.client.js)
+        jsMain {
+            dependsOn(webMain)
+        }
+        wasmJsMain {
+            dependsOn(webMain)
         }
     }
 }
@@ -133,6 +142,11 @@ kotlin {
 //}
 dependencies {
     androidRuntimeClasspath(compose.uiTooling)
+    kspAndroid(libs.androidx.room.compiler)
+    add("kspJvm", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosX64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
 }
 
 room {

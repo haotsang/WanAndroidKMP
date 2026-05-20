@@ -5,11 +5,11 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
 import java.util.prefs.Preferences
 
-class DesktopPlatform : Platform {
+class JvmPlatform : Platform {
     override val name: String = System.getProperty("os.name").orEmpty()
 }
 
-actual fun getPlatform(): Platform = DesktopPlatform()
+actual fun getPlatform(): Platform = JvmPlatform()
 
 actual fun httpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = HttpClient(OkHttp) {
     config(this)
@@ -17,7 +17,7 @@ actual fun httpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = Http
 
 actual fun getCurrentTimeMillis(): Long = System.currentTimeMillis()
 
-object DesktopKvStorage : IKvStorage {
+object JvmKvStorage : IKvStorage {
     private val preferences: Preferences by lazy {
         Preferences.userRoot().node("com/haotsang/wanandroidkmp")
     }
@@ -31,4 +31,4 @@ object DesktopKvStorage : IKvStorage {
     }
 }
 
-actual fun getKvStorage(): IKvStorage = DesktopKvStorage
+actual fun getKvStorage(): IKvStorage = JvmKvStorage
